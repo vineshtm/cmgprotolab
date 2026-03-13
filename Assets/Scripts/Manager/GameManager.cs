@@ -23,6 +23,12 @@ public class GameManager : MonoBehaviour
 
     private int remainingPairs;
 
+    //Game Events Declarations  
+    public Action<bool> OnStartGame;
+    public Action<int> OnEndGame;
+    public Action<bool> OnCardSelected;
+    public Action<bool> OnCardMatchingChecked;
+
     public void StartGame()
     {
         SetupGrid(Rows, Columns);
@@ -30,6 +36,8 @@ public class GameManager : MonoBehaviour
         remainingPairs = (Rows * Columns) / 2;
 
         m_ScoringMechanism.ResetScore();
+
+        OnStartGame?.Invoke(true);
     }
 
     //GRID SETUP
@@ -51,6 +59,7 @@ public class GameManager : MonoBehaviour
 
     void OnCardClicked(GridCardView card)
     {
+        OnCardSelected?.Invoke(true);
         HandleCardClick(card);
     }    
 
@@ -81,6 +90,8 @@ public class GameManager : MonoBehaviour
             m_ScoringMechanism.AddScore(10);
 
             OnPairMatched();
+
+            OnCardMatchingChecked?.Invoke(true);
         }
         else
         {
@@ -88,6 +99,8 @@ public class GameManager : MonoBehaviour
             SelectedCardTwo.FlipBack();
 
             m_ScoringMechanism.AddScore(-5);
+
+            OnCardMatchingChecked?.Invoke(false);
         }
     }
 
@@ -105,6 +118,8 @@ public class GameManager : MonoBehaviour
     {
         int finalScore = m_ScoringMechanism.Score;
         Debug.Log("============" + finalScore);
+
+        OnEndGame?.Invoke(finalScore);
     }
 
     //UTIL
