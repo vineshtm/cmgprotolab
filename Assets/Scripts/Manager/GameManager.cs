@@ -7,6 +7,9 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     [SerializeField]
+    private ScoringMechanism m_ScoringMechanism;
+
+    [SerializeField]
     private GridLayoutSpawnerUtil m_GridSpawner;
 
     [SerializeField]
@@ -18,9 +21,15 @@ public class GameManager : MonoBehaviour
     private List<GameObject> m_CurrentSessionCardList;
     private List<GridCardView> m_SelectedCardList = new List<GridCardView>();
 
+    private int remainingPairs;
+
     public void StartGame()
     {
         SetupGrid(Rows, Columns);
+
+        remainingPairs = (Rows * Columns) / 2;
+
+        m_ScoringMechanism.ResetScore();
     }
 
     //GRID SETUP
@@ -68,12 +77,34 @@ public class GameManager : MonoBehaviour
         {
             SelectedCardOne.Match();
             SelectedCardTwo.Match();
+
+            m_ScoringMechanism.AddScore(10);
+
+            OnPairMatched();
         }
         else
         {
             SelectedCardOne.FlipBack();
             SelectedCardTwo.FlipBack();
+
+            m_ScoringMechanism.AddScore(-5);
         }
+    }
+
+    void OnPairMatched()
+    {
+        remainingPairs--;
+
+        if (remainingPairs <= 0)
+        {
+            GameOver();
+        }
+    }
+
+    void GameOver()
+    {
+        int finalScore = m_ScoringMechanism.Score;
+        Debug.Log("============" + finalScore);
     }
 
     //UTIL

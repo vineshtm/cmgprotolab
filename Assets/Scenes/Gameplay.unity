@@ -364,6 +364,7 @@ GameObject:
   - component: {fileID: 680194442}
   - component: {fileID: 680194441}
   - component: {fileID: 680194443}
+  - component: {fileID: 680194444}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -383,6 +384,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76283ebbce290447c9b084fb4b954433, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_ScoringMechanism: {fileID: 680194444}
   m_GridSpawner: {fileID: 680194443}
   Rows: 6
   Columns: 5
@@ -416,6 +418,18 @@ MonoBehaviour:
   m_CardPrefab: {fileID: 6526313153700788554, guid: 16b437ae096824fd780446e70a625574, type: 3}
   m_CardGridLayout: {fileID: 140040323}
   m_GridRectTransform: {fileID: 140040319}
+--- !u!114 &680194444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 680194440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d1310b5345aa41aebb0a242126e20a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1047970213
 GameObject:
   m_ObjectHideFlags: 0
