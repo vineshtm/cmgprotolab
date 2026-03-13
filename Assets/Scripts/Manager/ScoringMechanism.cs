@@ -5,7 +5,7 @@ using UnityEngine;
 public class ScoringMechanism : MonoBehaviour
 {
     private int m_Score;
-    public int Score
+    private int Score
     {
         get
         {
@@ -16,12 +16,36 @@ public class ScoringMechanism : MonoBehaviour
         }
     }
 
-    public void ResetScore()
+    private void OnEnable()
+    {
+        EventManager.OnGameStart += StartGame;
+        EventManager.OnScoreUpdate += AddScore;
+        EventManager.OnGameEnd += GameOver;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.OnGameStart -= StartGame;
+        EventManager.OnScoreUpdate -= AddScore;
+        EventManager.OnGameEnd -= GameOver;
+    }
+
+    private void StartGame()
+    {
+        ResetScore();
+    }
+
+    private void GameOver()
+    {
+        EventManager.DeclareFinalScore(Score);
+    }
+
+    private void ResetScore()
     {
         m_Score = 0;
     }
 
-    public void AddScore(int value)
+    private void AddScore(int value)
     {
         m_Score += value;
     }

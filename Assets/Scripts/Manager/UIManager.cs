@@ -37,17 +37,30 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        m_GameManager.OnStartGame += OnStartGame;
-        m_GameManager.OnEndGame += OnEndGame;
+        //m_GameManager.OnStartGame += OnStartGame;
+        //m_GameManager.OnEndGame += OnEndGame;
+
+        EventManager.OnGameStart += OnStartGame;
+        EventManager.OnGameEnd += OnEndGame;
+
+        EventManager.OnFinalScoreUpdate += UpdateScoreboard;
     }
 
-    private void OnStartGame(bool gamestate)
+    private void OnDisable()
+    {
+        EventManager.OnGameStart -= OnStartGame;
+        EventManager.OnGameEnd -= OnEndGame;
+
+        EventManager.OnFinalScoreUpdate -= UpdateScoreboard;
+    }
+
+    private void OnStartGame()
     {
     }
 
-    private void OnEndGame(int Score)
+    private void OnEndGame()
     {
-        ShowResultScreen(Score);
+        ShowResultScreen();
     }
 
     // Start is called before the first frame update
@@ -85,13 +98,16 @@ public class UIManager : MonoBehaviour
         m_GameResultScreen.SetActive(false);
     }
 
-    private void ShowResultScreen(int Score)
+    private void ShowResultScreen()
     {
-        m_Score.text = Score.ToString();
-
         m_HomeScreen.SetActive(false);
         m_GameplayScreen.SetActive(false);
         m_GameResultScreen.SetActive(true);
+    }
+
+    private void UpdateScoreboard(int Score)
+    {
+        m_Score.text = Score.ToString();
     }
 
     private void LevelSelected(int index)
