@@ -40,6 +40,18 @@ public class GameManager : MonoBehaviour
         OnStartGame?.Invoke(true);
     }
 
+    public void SetGridRowsAndColumns(int LevelIndex)
+    {
+        switch (LevelIndex)
+        {
+            case 0: { Rows = 2; Columns = 2; break; } //Beginner
+            case 1: { Rows = 3; Columns = 2; break; } //Medium
+            case 2: { Rows = 4; Columns = 3; break; } //Hard
+            case 3: { Rows = 5; Columns = 4; break; } //Expert
+            case 4: { Rows = 6; Columns = 5; break; } //Nightmare
+        }
+    }
+
     //GRID SETUP
     private void SetupGrid(int GridRows, int GridColumns)
     {
@@ -131,6 +143,7 @@ public class GameManager : MonoBehaviour
             Card card = new Card();
             card.CardId = i.ToString();
             card.CardName = i.ToString();
+            card.CardFrontColor = UnityEngine.Random.ColorHSV();
 
             cardList.Add(card);
         }

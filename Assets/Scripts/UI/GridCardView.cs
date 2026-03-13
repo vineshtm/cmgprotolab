@@ -31,6 +31,7 @@ public class GridCardView : MonoBehaviour
         //Set Card
         m_Card = CardData;
         m_CardText.text = m_Card.CardName;
+        m_CardFront.GetComponent<Image>().color = m_Card.CardFrontColor;
 
         ShowBack();
     }
@@ -71,7 +72,8 @@ public class GridCardView : MonoBehaviour
         IsMatched = true;
 
         //disable card
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
+        DisableCard();
     }
 
     public void ShowBack()
@@ -80,5 +82,11 @@ public class GridCardView : MonoBehaviour
         m_CardBack.SetActive(true);
 
         IsFlipped = false;
+    }
+
+    private void DisableCard()
+    {
+        m_CardFront.SetActive(false);
+        m_CardBack.SetActive(false);
     }
 }

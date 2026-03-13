@@ -19,6 +19,8 @@ public class UIManager : MonoBehaviour
     private GameObject m_GameResultScreen;
 
     //HOME SCREEN UI
+    [SerializeField]
+    private TMP_Dropdown m_LevelSelectDropDown;
 
     [SerializeField]
     private Button m_StartGameButton;
@@ -57,6 +59,8 @@ public class UIManager : MonoBehaviour
         m_RestartGameButton.onClick.AddListener(StartGame);
 
         m_BackToHomeButton.onClick.AddListener(ShowHomeScreen);
+
+        m_LevelSelectDropDown.onValueChanged.AddListener(LevelSelected);
     }
 
     private void StartGame()
@@ -88,5 +92,10 @@ public class UIManager : MonoBehaviour
         m_HomeScreen.SetActive(false);
         m_GameplayScreen.SetActive(false);
         m_GameResultScreen.SetActive(true);
+    }
+
+    private void LevelSelected(int index)
+    {
+        m_GameManager.SetGridRowsAndColumns(index);
     }
 }
