@@ -19,6 +19,9 @@ public class GridCardView : MonoBehaviour
     [SerializeField]
     private Button m_CardButton;
 
+    [SerializeField]
+    private Animator m_Animator;
+
     public Action<GridCardView> OnCardClicked;
     public bool IsFlipped { get; private set; }
     public bool IsMatched { get; private set; }
@@ -55,16 +58,20 @@ public class GridCardView : MonoBehaviour
     {
         IsFlipped = true;
 
-        m_CardFront.SetActive(true);
-        m_CardBack.SetActive(false);
+        //m_CardFront.SetActive(true);
+        //m_CardBack.SetActive(false);
+
+        m_Animator.SetTrigger("flipFront");
     }
 
     public void FlipBack()
     {
         IsFlipped = false;
 
-        m_CardFront.SetActive(false);
-        m_CardBack.SetActive(true);
+        //m_CardFront.SetActive(false);
+        //m_CardBack.SetActive(true);
+
+        m_Animator.SetTrigger("flipBack");
     }
 
     public void Match()
@@ -86,7 +93,9 @@ public class GridCardView : MonoBehaviour
 
     private void DisableCard()
     {
-        m_CardFront.SetActive(false);
-        m_CardBack.SetActive(false);
+        //m_CardFront.SetActive(false);
+        //m_CardBack.SetActive(false);
+
+        m_Animator.SetTrigger("Disable");
     }
 }

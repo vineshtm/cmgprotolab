@@ -866,8 +866,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_GridSpawner: {fileID: 680194443}
-  Rows: 4
-  Columns: 4
+  Rows: 2
+  Columns: 2
 --- !u!4 &680194442
 Transform:
   m_ObjectHideFlags: 0
