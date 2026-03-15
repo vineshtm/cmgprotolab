@@ -275,4 +275,60 @@ public class GameManager : MonoBehaviour
 
         return cardList;
     }
+
+    //PUBLIC UTIL
+
+    public string LogProgressData()
+    {
+        string ProgressDataString = "";
+
+        ProgressData CurrentProgressData = m_ProgressManager.LoadProgress();
+
+        if (CurrentProgressData != null)
+        {
+            List<GameData> GameDataList = CurrentProgressData.GameDetailList;
+
+            string GameDataUnitystring = "";
+
+#if UNITY_EDITOR
+            string EditorLogDataString = "";
+#endif
+
+            for (int i = 0; i < GameDataList.Count; i++)
+            {
+                GameDataUnitystring += (i+1) + "."+
+                    " Level:" + ((DifficultyLevel)GameDataList[i]?.DifficultyLevelIndex) +
+                    ", Score:" + GameDataList[i]?.Score +
+                    " \n";
+
+#if UNITY_EDITOR
+                EditorLogDataString += (i + 1) + "." +
+                    " Level:" + ((DifficultyLevel)GameDataList[i]?.DifficultyLevelIndex) +
+                    " Score:" + GameDataList[i]?.Score +
+                    " Attempts:" + GameDataList[i]?.Attempts +
+                    " \n";
+#endif
+            }
+
+            ProgressDataString = ("\n"
+                + "Total Game Sessions : " + CurrentProgressData.TotalGameSessions + "\n"
+                + "Highest Score : " + CurrentProgressData.HighestScore + "\n\n"
+                + GameDataUnitystring + "\n");
+
+#if UNITY_EDITOR
+            Debug.Log("==========PROGRESS DATA==============" + "\n"
+                + "Total Game Sessions : " + CurrentProgressData.TotalGameSessions + "\n"
+                + "Highest Score : " + CurrentProgressData.HighestScore + "\n"
+                + EditorLogDataString + "\n" +
+                "========================================");
+#endif
+        }
+        else
+        {
+            ProgressDataString = "======NO PROGRESSDATA===========";
+            Debug.Log("======NO PROGRESSDATA===========");
+        }
+
+        return ProgressDataString;
+    }
 }

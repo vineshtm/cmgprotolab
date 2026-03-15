@@ -60,7 +60,21 @@ public class UIManager : MonoBehaviour
     private Button m_BackToHomeButton;
 
     [SerializeField]
-    private TextMeshProUGUI m_Score;
+    private TextMeshProUGUI m_LevelText;
+
+    [SerializeField]
+    private TextMeshProUGUI m_ScoreText;
+
+    //GAME DATA MANAGEMENT
+    [Header("Game Data Management")]
+    [SerializeField]
+    private GameObject m_GameDataScreen;
+
+    [SerializeField]
+    private Button m_DisplayGameDataButton;
+
+    [SerializeField]
+    private TextMeshProUGUI m_GameDataText;
 
     /// <summary>
     /// 
@@ -99,6 +113,9 @@ public class UIManager : MonoBehaviour
         //Add Result Screen UI Listeners
         m_RestartGameButton.onClick.AddListener(OnStartGame);
         m_BackToHomeButton.onClick.AddListener(ShowHomeScreen);
+
+        //Game Data
+        m_DisplayGameDataButton.onClick.AddListener(OnLoadGameData);
     }
 
     /// <summary>
@@ -107,7 +124,8 @@ public class UIManager : MonoBehaviour
     /// <param name="CurrentSessionData"></param>
     private void UpdateScoreboard(GameData CurrentSessionData)
     {
-        m_Score.text = CurrentSessionData.Score.ToString();
+        m_LevelText.text = "Level : " + ((DifficultyLevel)CurrentSessionData.DifficultyLevelIndex);
+        m_ScoreText.text = "Score : " + CurrentSessionData.Score;
 
         ShowResultScreen();
     }
@@ -151,6 +169,13 @@ public class UIManager : MonoBehaviour
         ShowGameplayScreen();
 
         m_GameManager.ResumeGame();
+    }
+
+    private void OnLoadGameData()
+    {
+        string GameDataLog = m_GameManager.LogProgressData();
+        m_GameDataText.text = GameDataLog;
+        m_GameDataScreen.SetActive(true);
     }
 
     /// <summary>

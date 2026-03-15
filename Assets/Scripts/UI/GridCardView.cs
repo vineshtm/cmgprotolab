@@ -68,7 +68,7 @@ public class GridCardView : MonoBehaviour
     {
         //Set Card
         m_Card = CardData;
-        m_CardText.text = m_Card.CardName;
+        m_CardText.SetText(m_Card.CardName);
         m_CardFront.GetComponent<Image>().color = m_Card.CardFrontColor;
 
         ShowBack(); //By Default Flip back the card initialy
