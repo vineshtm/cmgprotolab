@@ -1,9 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Scoring Mechanism - Manage the Scoring
+/// </summary>
 public class ScoringMechanism : MonoBehaviour
 {
+    /// <summary>
+    /// Current Game Score
+    /// </summary>
     private int m_Score;
     public int Score
     {
@@ -16,35 +20,19 @@ public class ScoringMechanism : MonoBehaviour
         }
     }
 
-    //private void OnEnable()
-    //{
-    //    EventManager.OnGameStart += StartGame;
-    //    EventManager.OnScoreUpdate += AddScore;
-    //    EventManager.OnGameEnd += GameOver;
-    //}
-
-    //private void OnDisable()
-    //{
-    //    EventManager.OnGameStart -= StartGame;
-    //    EventManager.OnScoreUpdate -= AddScore;
-    //    EventManager.OnGameEnd -= GameOver;
-    //}
-
-    public void StartGame()
-    {
-        ResetScore();
-    }
-
-    //public void GameOver()
-    //{
-    //    EventManager.DeclareFinalScore(Score);
-    //}
-
+    /// <summary>
+    /// Reset On Game Start
+    /// </summary>
     public void ResetScore()
     {
         m_Score = 0;
     }
 
+    /// <summary>
+    /// Update Score
+    /// Add Score/Points
+    /// </summary>
+    /// <param name="value">Score</param>
     public void AddScore(int value)
     {
         m_Score += value;

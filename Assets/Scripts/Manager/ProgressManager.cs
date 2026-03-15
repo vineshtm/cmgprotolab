@@ -3,11 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Manages the Save/Load of Game Progress
+/// </summary>
 public class ProgressManager : MonoBehaviour
 {
+    /// <summary>
+    /// Updates the Progress
+    /// Gets the Existing Progress Data
+    /// Update with the Currrent Game Deatils and save it back to the Prefs
+    /// </summary>
+    /// <param name="CurrentGameData"></param>
     public void SaveCurrentGameData(GameData CurrentGameData)
     {
-        ProgressData CurrentProgressData = LoadProgress();
+        ProgressData CurrentProgressData = LoadProgress(); //Get Existing Progres data
 
         if (CurrentProgressData == null)
             CurrentProgressData = new ProgressData();
@@ -15,24 +24,37 @@ public class ProgressManager : MonoBehaviour
         if (CurrentProgressData.GameDetailList == null)
             CurrentProgressData.GameDetailList = new List<GameData>();
 
-        CurrentProgressData.GameDetailList.Add(CurrentGameData);
+        CurrentProgressData.GameDetailList.Add(CurrentGameData); //Add the current data to 
 
-        CurrentProgressData.TotalGameSessions++;
+        CurrentProgressData.TotalGameSessions++; //increement total game session
         CurrentProgressData.HighestScore = GetHighScore(CurrentProgressData.GameDetailList);
 
         SaveProgressDataToPrefs(CurrentProgressData);
-
-#if UNITY_EDITOR
-        LogProgressDataOnEditorConsole();
-#endif
-
     }
 
+    /// <summary>
+    /// Load Game Progress Data
+    /// </summary>
+    /// <returns></returns>
     public ProgressData LoadProgress()
     {
         return GetPrefsProgressData();
     }
 
+    /// <summary>
+    /// Clear All Progress Data
+    /// </summary>
+    public void ClearAllProgressData()
+    {
+        ClearPrefsProgressData();
+    }
+
+    /// <summary>
+    /// Get the Highest Score from all the List of Games
+    /// Checks for the Scores of each game and Gets the highest of All.
+    /// </summary>
+    /// <param name="GameDataList">List of Games</param>
+    /// <returns></returns>
     private int GetHighScore(List<GameData> GameDataList)
     {
         int HighScore = 0;
@@ -49,44 +71,18 @@ public class ProgressManager : MonoBehaviour
         return HighScore;
     }
 
-#if UNITY_EDITOR
 
-    private void LogProgressDataOnEditorConsole()
-    {
-        ProgressData CurrentProgressData = LoadProgress();
+    //PREFS MANAGER
 
-        if (CurrentProgressData != null)
-        {
-            List<GameData> GameDataList = CurrentProgressData.GameDetailList;
-
-            string GameDataUnitystring = "";
-
-            for (int i = 0; i < GameDataList.Count; i++)
-            {
-                GameDataUnitystring += "-" + i + ".===Score:"
-                + GameDataList[i]?.Score + "   ==Attempts:"
-                + GameDataList[i]?.Attempts + "====\n";
-            }
-
-            Debug.Log("==========CURRENT PROGRESS==============" + "\n"
-                + "Total Game Sessions : " + CurrentProgressData.TotalGameSessions + "===="
-                + "Highest Score : " + CurrentProgressData.HighestScore + "====\n"
-                + GameDataUnitystring + "\n" +
-                "========================================");
-        }
-        else
-        {
-            Debug.Log("======NO PROGRESSDATA===========");
-        }
-    }
-
-#endif
-
-
-    //PREFS MANABER
-
+    /// <summary>
+    /// Prefs Key for the Progress Data JSON
+    /// </summary>
     private const string PREF_PROGRESSDATA = "App_ProgressData";
 
+    /// <summary>
+    /// Save the Progress Data Details to the Prefs
+    /// </summary>
+    /// <param name="progress"></param>
     private void SaveProgressDataToPrefs(ProgressData progress)
     {
         string ProgressDataJson = null;
@@ -122,5 +118,13 @@ public class ProgressManager : MonoBehaviour
         }
 
         return Data;
+    }
+
+    /// <summary>
+    /// Clear All Progress Data from the Prefs
+    /// </summary>
+    private void ClearPrefsProgressData()
+    {
+        PrefsUtil.ClearData(PREF_PROGRESSDATA);
     }
 }

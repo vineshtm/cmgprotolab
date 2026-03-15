@@ -1,36 +1,52 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Audio Manager managing the Audio System of the Game
+/// Plays Audio clips based on Evenets
+/// </summary>
 public class AudioManager : MonoBehaviour
 {
-    public AudioSource source;
+    [Header("Audio Source")]
+    [SerializeField]
+    private AudioSource m_AudioSource; //Audio Source to Play Audio Clips
 
-    public AudioClip flip;
-    public AudioClip match;
-    public AudioClip mismatch;
-    public AudioClip gameOver;
+    [Header("Audio Clips")]
+    [SerializeField]
+    private AudioClip CardFlipClip; //Audio Clip when Card Flip
 
+    [SerializeField]
+    private AudioClip CardsMatchClip; //Audio Clip when Cards Match
+
+    [SerializeField]
+    private AudioClip CardsMismatchClip; //Audio Clip when Card Mismatch
+
+    [SerializeField]
+    private AudioClip GameOverClip; //Audio Clip when Game Over
+
+    /// <summary>
+    /// </summary>
     private void OnEnable()
     {
+        //Register Events
         EventManager.OnCardSelected += PlayFlipSound;
         EventManager.OnCardMatchingChecked += OnCardMatchCheck;
         EventManager.OnGameEnd += PlayGameOverSound;
     }
 
+    /// <summary>
+    /// </summary>
     private void OnDisable()
     {
+        //Unregister Events
         EventManager.OnCardSelected -= PlayFlipSound;
         EventManager.OnCardMatchingChecked -= OnCardMatchCheck;
         EventManager.OnGameEnd -= PlayGameOverSound;
     }
 
-    private void PlayFlipSound()
-    {
-        if (source != null && flip != null)
-            source.PlayOneShot(flip);
-    }
-
+    /// <summary>
+    /// Cards Check for Match to play respective Sounds
+    /// </summary>
+    /// <param name="isMatching"></param>
     private void OnCardMatchCheck(bool isMatching)
     {
         if (isMatching)
@@ -43,21 +59,39 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Play Card flip sound
+    /// </summary>
+    private void PlayFlipSound()
+    {
+        if (m_AudioSource != null && CardFlipClip != null)
+            m_AudioSource.PlayOneShot(CardFlipClip);
+    }
+
+    /// <summary>
+    /// Play Cards Match Sound
+    /// </summary>
     private void PlayMatchSound()
     {
-        if (source != null && match != null)
-            source.PlayOneShot(match);
+        if (m_AudioSource != null && CardsMatchClip != null)
+            m_AudioSource.PlayOneShot(CardsMatchClip);
     }
 
+    /// <summary>
+    /// Play Cards Mismatch Sound
+    /// </summary>
     private void PlayMismatchSound()
     {
-        if (source != null && mismatch != null)
-            source.PlayOneShot(mismatch);
+        if (m_AudioSource != null && CardsMismatchClip != null)
+            m_AudioSource.PlayOneShot(CardsMismatchClip);
     }
 
+    /// <summary>
+    /// Play Game Over Sound
+    /// </summary>
     private void PlayGameOverSound()
     {
-        if (source != null && gameOver != null)
-            source.PlayOneShot(gameOver);
+        if (m_AudioSource != null && GameOverClip != null)
+            m_AudioSource.PlayOneShot(GameOverClip);
     }
 }

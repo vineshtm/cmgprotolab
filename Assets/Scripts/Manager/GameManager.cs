@@ -1,11 +1,17 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
+/// <summary>
+/// Game Manager
+/// Manage the Game Flow
+/// Interact with Scoring Mechanism to Update Scores
+/// Interracts with Progress Manager to Update the Game Progress
+/// </summary>
 public class GameManager : MonoBehaviour
 {
+    //MANAGER INSTANCE
+    [Header("Manager Instance")]
     [SerializeField]
     private ScoringMechanism m_ScoringMechanism;
 
@@ -15,42 +21,228 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GridLayoutSpawnerUtil m_GridSpawner;
 
-    [SerializeField]
-    private int Rows = 2; //Temporarily serialize it
+    //PRIVATE VARIABLES
+    private int Rows = 2;
+    private int Columns = 2;
 
-    [SerializeField]
-    private int Columns = 2; //Temporarily serialize it
-
-    private List<GameObject> m_CurrentSessionCardList;
+    /// <summary>
+    /// List of Selected Cards - Manage Selected Cards
+    /// </summary>
     private List<GridCardView> m_SelectedCardList = new List<GridCardView>();
 
+    /// <summary>
+    /// Remaining Pairs of Cards to Match
+    /// </summary>
     private int remainingPairs;
 
-    ////Game Events Declarations  
-    //public Action<bool> OnStartGame;
-    //public Action<int> OnEndGame;
-    //public Action<bool> OnCardSelected;
-    //public Action<bool> OnCardMatchingChecked;
-
+    /// <summary>
+    /// Deatils of the Currrent Game Session
+    /// </summary>
     private GameData m_CurrentGameDetails;
 
-    public void StartGame()
+    /// <summary>
+    /// Start Game
+    /// Inits the Game - Resets Game Parameters
+    /// SetupCreate Card Grid
+    /// Trigger Game Start Event to Notify
+    /// </summary>
+    /// <param name="LevelIndex">Difficulty Level Index to identofy the Grid Layout</param>
+    public void StartGame(int LevelIndex)
     {
-        SetupGrid(Rows, Columns);
+        CreateNewGameSession(LevelIndex);//Init Game
 
-        remainingPairs = (Rows * Columns) / 2;
+        SetupGrid(Rows, Columns);//Grid Layout Setup
 
-        m_ScoringMechanism.ResetScore();
-
-        CreateGameSession();
-
-        //OnStartGame?.Invoke(true);
-        EventManager.StartGame();
-
-        
+        EventManager.StartGame(); //trigger Game Session Ready
     }
 
-    public void SetGridRowsAndColumns(int LevelIndex)
+    /// <summary>
+    /// Pause Game
+    /// </summary>
+    public void PauseGame()
+    {
+
+    }
+
+    /// <summary>
+    /// Restart Game from Pause
+    /// </summary>
+    public void RestartGame()
+    {
+        int CurrentLevelIndex = m_CurrentGameDetails.DifficultyLevelIndex;
+
+        StartGame(CurrentLevelIndex);
+    }
+
+    /// <summary>
+    /// Resume Game from Pause
+    /// </summary>
+    public void ResumeGame()
+    {
+
+    }
+
+    /// <summary>
+    /// Create a New Game session Instance
+    /// </summary>
+    /// <param name="LevelIndex"></param>
+    private void CreateNewGameSession(int LevelIndex)
+    {
+        //Set the Rows and Columns for the Grid based on The Selected Difficulty Level
+        SetGridRowsAndColumns(LevelIndex);
+
+        //Clear Selected Card Set
+        m_SelectedCardList?.Clear();
+
+        //Reset Game Parameters
+        remainingPairs = (Rows * Columns) / 2;
+
+        //Reset Current Game Session data
+        if (m_CurrentGameDetails == null)
+            m_CurrentGameDetails = new GameData();
+
+        m_CurrentGameDetails.DifficultyLevelIndex = LevelIndex;
+        m_CurrentGameDetails.Attempts = 0;
+
+        //Reset Score
+        m_ScoringMechanism.ResetScore();
+    }
+
+    /// <summary>
+    /// Setup Grid
+    /// Create the Grid Layout
+    /// Instantiate the Cards Prefabs to scripts
+    /// Setup the View and Card Deatils
+    /// </summary>
+    /// <param name="GridRows"></param>
+    /// <param name="GridColumns"></param>
+    private void SetupGrid(int GridRows, int GridColumns)
+    {
+        //Instantiate Card Prefabs in Grid
+        List<GameObject> CurrentSessionCardList = m_GridSpawner.GenerateShuffledGrid(GridRows, GridColumns);
+
+        //Setup Cards
+        List<Card> cardList = GenerateCards(CurrentSessionCardList.Count / 2);
+
+        for (int i = 0; i < CurrentSessionCardList.Count; i++)
+        {
+            GridCardView cardview = CurrentSessionCardList[i].GetComponent<GridCardView>();
+            cardview.SetupCardView(cardList[i % (cardList.Count)]);
+            cardview.OnCardClicked += OnCardClicked;
+        }
+    }
+
+    /// <summary>
+    /// On Card Click Event
+    /// </summary>
+    /// <param name="card"></param>
+    void OnCardClicked(GridCardView card)
+    {
+        EventManager.CardSelected(); //Trigger Card Clicked Event
+
+        HandleCardClick(card); //Handle click
+    }
+
+    /// <summary>
+    /// Hanbdle Click on Card
+    /// </summary>
+    /// <param name="card"></param>
+    public void HandleCardClick(GridCardView card)
+    {
+        m_SelectedCardList.Add(card); //Register selection of Card
+
+        if (m_SelectedCardList.Count == 2) //Check if 2 cards are selected.
+        {
+            StartCoroutine(CheckCardMatching()); //Run Matching Logic If 2 Cards selected
+        }
+    }
+
+    /// <summary>
+    /// Check if Selected Cards Match
+    /// Manage the Attempts
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator CheckCardMatching()
+    {
+        m_CurrentGameDetails.Attempts++;//Increment Attempts for current game session
+
+        GridCardView SelectedCardOne = m_SelectedCardList[0]; //first clicked/seected card for matching
+        GridCardView SelectedCardTwo = m_SelectedCardList[1]; //second clicked/selected card for matching
+
+        m_SelectedCardList.Clear(); //Clear List to manage next clicks before matching logic
+
+        yield return new WaitForSeconds(0.5f);
+
+        if (SelectedCardOne.Card.CardId == SelectedCardTwo.Card.CardId)
+        {
+            SelectedCardOne.Match(); //Update Card State
+            SelectedCardTwo.Match();  //Update Card State
+
+            m_ScoringMechanism.AddScore(10); //+10 Points if Cards Match
+
+            OnPairMatched();
+
+            EventManager.CardMatchResult(true);
+        }
+        else
+        {
+            SelectedCardOne.FlipBack(); //Update Card State
+            SelectedCardTwo.FlipBack(); //Update Card State
+
+            m_ScoringMechanism.AddScore(-5); // -5 points if cards does not match. Negative marking for mismatch applied
+
+            EventManager.CardMatchResult(false);
+        }
+    }
+
+    /// <summary>
+    /// Handle Pair Match
+    /// And identify all pairs are matched
+    /// </summary>
+    private void OnPairMatched()
+    {
+        remainingPairs--;
+
+        if (remainingPairs <= 0)
+        {
+            GameOver();
+        }
+    }
+
+    /// <summary>
+    /// Game Over
+    /// Update the Scores
+    /// Generate Current Game Session Data
+    /// Declare Result
+    /// Save the Progress
+    /// </summary>
+    private void GameOver()
+    {
+        m_CurrentGameDetails.Score = m_ScoringMechanism.Score; //Update Game Score
+
+        EventManager.EndGame();
+        EventManager.DeclareGameData(m_CurrentGameDetails); //Trigger Game Over/Result Declare
+
+        //Save Game Data
+        m_ProgressManager.SaveCurrentGameData(m_CurrentGameDetails);
+
+#if UNITY_EDITOR
+        //LOG for Debug Purpose
+        Debug.Log("========GAME OVER=========="
+            + "====" + m_CurrentGameDetails.DifficultyLevelIndex
+            + "====" + m_CurrentGameDetails.Score
+            + "====" + m_CurrentGameDetails.Attempts);
+#endif
+    }
+
+    //UTILS (TEMPORARY)
+
+    /// <summary>
+    /// Set the Grid Rows and COlumns based on The selected Difficulty Level Index
+    /// Hard Coded now
+    /// </summary>
+    /// <param name="LevelIndex"></param>
+    private void SetGridRowsAndColumns(int LevelIndex)
     {
         switch (LevelIndex)
         {
@@ -62,110 +254,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CreateGameSession()
-    {
-        if (m_CurrentGameDetails == null)
-            m_CurrentGameDetails = new GameData();
-
-        m_CurrentGameDetails.Attempts = 0;
-    }
-
-    //GRID SETUP
-    private void SetupGrid(int GridRows, int GridColumns)
-    {
-        //Instantiate Card Prefabs in Grid
-        m_CurrentSessionCardList = m_GridSpawner.GenerateShuffledGrid(GridRows, GridColumns);
-
-        //Setup Cards
-        List<Card> cardList = GenerateCards(m_CurrentSessionCardList.Count / 2);
-
-        for (int i = 0; i < m_CurrentSessionCardList.Count; i++)
-        {
-            GridCardView cardview = m_CurrentSessionCardList[i].GetComponent<GridCardView>();
-            cardview.SetupCardView(cardList[i % (cardList.Count)]);
-            cardview.OnCardClicked += OnCardClicked;
-        }
-    }
-
-    void OnCardClicked(GridCardView card)
-    {
-        //OnCardSelected?.Invoke(true);
-        EventManager.CardSelected();
-        HandleCardClick(card);
-    }    
-
-    public void HandleCardClick(GridCardView card)
-    {
-        m_SelectedCardList.Add(card);
-
-        if (m_SelectedCardList.Count == 2)
-        {
-            StartCoroutine(CheckCardMatching());
-        }
-    }
-
-    IEnumerator CheckCardMatching()
-    {
-        m_CurrentGameDetails.Attempts++;
-
-        GridCardView SelectedCardOne = m_SelectedCardList[0];
-        GridCardView SelectedCardTwo = m_SelectedCardList[1];
-
-        m_SelectedCardList.Clear();
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (SelectedCardOne.Card.CardId == SelectedCardTwo.Card.CardId)
-        {
-            SelectedCardOne.Match();
-            SelectedCardTwo.Match();
-
-            m_ScoringMechanism.AddScore(10);
-
-            OnPairMatched();
-
-            //OnCardMatchingChecked?.Invoke(true);
-            EventManager.CardMatchResult(true);
-            //EventManager.OnScoreUpdate(10);
-        }
-        else
-        {
-            SelectedCardOne.FlipBack();
-            SelectedCardTwo.FlipBack();
-
-            m_ScoringMechanism.AddScore(-5);
-
-            //OnCardMatchingChecked?.Invoke(false);
-            EventManager.CardMatchResult(false);
-            //EventManager.OnScoreUpdate(-5);
-        }
-    }
-
-    void OnPairMatched()
-    {
-        remainingPairs--;
-
-        if (remainingPairs <= 0)
-        {
-            GameOver();
-        }
-    }
-
-    void GameOver()
-    {
-        int finalScore = m_ScoringMechanism.Score;
-        //Debug.Log("============" + finalScore);
-
-        //OnEndGame?.Invoke(finalScore);
-        EventManager.EndGame();
-        EventManager.DeclareFinalScore(finalScore);
-
-        //Save Progress
-        m_CurrentGameDetails.Score = finalScore;
-        m_ProgressManager.SaveCurrentGameData(m_CurrentGameDetails);
-    }
-
-    //UTIL
+    /// <summary>
+    /// Creates Sets Of Cards
+    /// Card properties Generated randomly
+    /// </summary>
+    /// <param name="CardCount"></param>
+    /// <returns></returns>
     private List<Card> GenerateCards(int CardCount)
     {
         List<Card> cardList = new List<Card>();
