@@ -6,8 +6,11 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    //[SerializeField]
-    //private ScoringMechanism m_ScoringMechanism;
+    [SerializeField]
+    private ScoringMechanism m_ScoringMechanism;
+
+    [SerializeField]
+    private ProgressManager m_ProgressManager;
 
     [SerializeField]
     private GridLayoutSpawnerUtil m_GridSpawner;
@@ -29,16 +32,22 @@ public class GameManager : MonoBehaviour
     //public Action<bool> OnCardSelected;
     //public Action<bool> OnCardMatchingChecked;
 
+    private GameData m_CurrentGameDetails;
+
     public void StartGame()
     {
         SetupGrid(Rows, Columns);
 
         remainingPairs = (Rows * Columns) / 2;
 
-        //m_ScoringMechanism.ResetScore();
+        m_ScoringMechanism.ResetScore();
+
+        CreateGameSession();
 
         //OnStartGame?.Invoke(true);
         EventManager.StartGame();
+
+        
     }
 
     public void SetGridRowsAndColumns(int LevelIndex)
@@ -51,6 +60,14 @@ public class GameManager : MonoBehaviour
             case 3: { Rows = 5; Columns = 4; break; } //Expert
             case 4: { Rows = 6; Columns = 5; break; } //Nightmare
         }
+    }
+
+    private void CreateGameSession()
+    {
+        if (m_CurrentGameDetails == null)
+            m_CurrentGameDetails = new GameData();
+
+        m_CurrentGameDetails.Attempts = 0;
     }
 
     //GRID SETUP
@@ -89,6 +106,8 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CheckCardMatching()
     {
+        m_CurrentGameDetails.Attempts++;
+
         GridCardView SelectedCardOne = m_SelectedCardList[0];
         GridCardView SelectedCardTwo = m_SelectedCardList[1];
 
@@ -101,24 +120,24 @@ public class GameManager : MonoBehaviour
             SelectedCardOne.Match();
             SelectedCardTwo.Match();
 
-            //m_ScoringMechanism.AddScore(10);
+            m_ScoringMechanism.AddScore(10);
 
             OnPairMatched();
 
             //OnCardMatchingChecked?.Invoke(true);
             EventManager.CardMatchResult(true);
-            EventManager.OnScoreUpdate(10);
+            //EventManager.OnScoreUpdate(10);
         }
         else
         {
             SelectedCardOne.FlipBack();
             SelectedCardTwo.FlipBack();
 
-            //m_ScoringMechanism.AddScore(-5);
+            m_ScoringMechanism.AddScore(-5);
 
             //OnCardMatchingChecked?.Invoke(false);
             EventManager.CardMatchResult(false);
-            EventManager.OnScoreUpdate(-5);
+            //EventManager.OnScoreUpdate(-5);
         }
     }
 
@@ -134,12 +153,16 @@ public class GameManager : MonoBehaviour
 
     void GameOver()
     {
-        //int finalScore = m_ScoringMechanism.Score;
+        int finalScore = m_ScoringMechanism.Score;
         //Debug.Log("============" + finalScore);
 
         //OnEndGame?.Invoke(finalScore);
         EventManager.EndGame();
+        EventManager.DeclareFinalScore(finalScore);
 
+        //Save Progress
+        m_CurrentGameDetails.Score = finalScore;
+        m_ProgressManager.SaveCurrentGameData(m_CurrentGameDetails);
     }
 
     //UTIL
