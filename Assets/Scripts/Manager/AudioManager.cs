@@ -91,6 +91,8 @@ public class AudioManager : MonoBehaviour
 
     /// <summary>
     /// Play Game Over Sound
+    /// Can also play different Clips based onb the Scores
+    /// For Eg like if score = 0, Play "Better Next Time" and if good score"Excellent etc etc
     /// </summary>
     private void PlayGameOverSound()
     {

@@ -27,7 +27,7 @@ public class ProgressManager : MonoBehaviour
         CurrentProgressData.GameDetailList.Add(CurrentGameData); //Add the current data to 
 
         CurrentProgressData.TotalGameSessions++; //increement total game session
-        CurrentProgressData.HighestScore = GetHighScore(CurrentProgressData.GameDetailList);
+        CurrentProgressData.HighestScore = GetHighScore(CurrentProgressData.GameDetailList); //Highest Score across all levels
 
         SaveProgressDataToPrefs(CurrentProgressData);
     }
@@ -52,6 +52,8 @@ public class ProgressManager : MonoBehaviour
     /// <summary>
     /// Get the Highest Score from all the List of Games
     /// Checks for the Scores of each game and Gets the highest of All.
+    /// Highest Score can be based on each level because highest across levels/layouts does not make much sense.
+    /// The fact that highest scorer will be finally, anyways with the biggest layouts.
     /// </summary>
     /// <param name="GameDataList">List of Games</param>
     /// <returns></returns>

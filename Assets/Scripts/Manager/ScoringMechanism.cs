@@ -23,13 +23,13 @@ public class ScoringMechanism : MonoBehaviour
     /// No Of Continuos Matches to award Extra Bonus
     /// </summary>
     [SerializeField]
-    private int m_ContinuosMatchCountForBonus = 3;
+    private int m_ContinuousMatchCountForBonus = 3;
 
     /// <summary>
     /// Reward Bonus for Continous Matches
     /// </summary>
     [SerializeField]
-    private int m_ContinuosMatchBonusPoint = 5;
+    private int m_ContinuousMatchBonusPoint = 5;
 
     /// <summary>
     /// Current Game Score
@@ -46,7 +46,10 @@ public class ScoringMechanism : MonoBehaviour
         }
     }
 
-    private int m_ContinuosMatches = 0;
+    /// <summary>
+    /// Identify Continuous matches. To keep track of Continuous matches
+    /// </summary>
+    private int m_ContinuousMatches = 0;
 
     /// <summary>
     /// Reset On Game Start
@@ -54,7 +57,7 @@ public class ScoringMechanism : MonoBehaviour
     public void ResetScoring()
     {
         m_Score = 0;
-        m_ContinuosMatches = 0;
+        m_ContinuousMatches = 0;
     }
 
     /// <summary>
@@ -80,22 +83,22 @@ public class ScoringMechanism : MonoBehaviour
             m_Score += m_MatchScore;
 
             //Check for Contnuous Match Bonus
-            m_ContinuosMatches++;
-            if(m_ContinuosMatches >= m_ContinuosMatchCountForBonus)
+            m_ContinuousMatches++;
+            if(m_ContinuousMatches >= m_ContinuousMatchCountForBonus)
             {
                 //Apply Multiplied Bonus with Continuos Matching
-                int Continousfactor = (m_ContinuosMatches / m_ContinuosMatchCountForBonus);
-                int ExtraBonus = (Continousfactor > 1) ? (Continousfactor * m_ContinuosMatchCountForBonus) : (0);
-                int ContinuosMatchScore = (m_ContinuosMatchCountForBonus + ExtraBonus);
+                int Continousfactor = (m_ContinuousMatches / m_ContinuousMatchCountForBonus);
+                int ExtraBonus = (Continousfactor > 1) ? (Continousfactor * m_ContinuousMatchBonusPoint) : (0);
+                int ContinuousMatchScore = (m_ContinuousMatchBonusPoint + ExtraBonus);
 
-                m_Score += ContinuosMatchScore;
+                m_Score += ContinuousMatchScore;
             }
         }
         else
         {
             m_Score -= m_MismatchPenalty;
 
-            m_ContinuosMatches = 0;
+            m_ContinuousMatches = 0;
         }
     }
 
