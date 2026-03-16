@@ -6,22 +6,22 @@ using UnityEngine;
 /// </summary>
 public class AudioManager : MonoBehaviour
 {
-    [Header("Audio Source")]
+    [Header("Audio Sources")]
     [SerializeField]
     private AudioSource m_AudioSource; //Audio Source to Play Audio Clips
 
     [Header("Audio Clips")]
     [SerializeField]
-    private AudioClip CardFlipClip; //Audio Clip when Card Flip
+    private AudioClip m_CardFlipClip; //Audio Clip when Card Flip
 
     [SerializeField]
-    private AudioClip CardsMatchClip; //Audio Clip when Cards Match
+    private AudioClip m_CardsMatchClip; //Audio Clip when Cards Match
 
     [SerializeField]
-    private AudioClip CardsMismatchClip; //Audio Clip when Card Mismatch
+    private AudioClip m_CardsMismatchClip; //Audio Clip when Card Mismatch
 
     [SerializeField]
-    private AudioClip GameOverClip; //Audio Clip when Game Over
+    private AudioClip m_GameOverClip; //Audio Clip when Game Over
 
     /// <summary>
     /// </summary>
@@ -31,6 +31,9 @@ public class AudioManager : MonoBehaviour
         EventManager.OnCardSelected += PlayFlipSound;
         EventManager.OnCardMatchingChecked += OnCardMatchCheck;
         EventManager.OnGameEnd += PlayGameOverSound;
+
+        //Play Background Music
+
     }
 
     /// <summary>
@@ -64,8 +67,8 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     private void PlayFlipSound()
     {
-        if (m_AudioSource != null && CardFlipClip != null)
-            m_AudioSource.PlayOneShot(CardFlipClip);
+        if (m_AudioSource != null && m_CardFlipClip != null)
+            m_AudioSource.PlayOneShot(m_CardFlipClip);
     }
 
     /// <summary>
@@ -73,8 +76,8 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     private void PlayMatchSound()
     {
-        if (m_AudioSource != null && CardsMatchClip != null)
-            m_AudioSource.PlayOneShot(CardsMatchClip);
+        if (m_AudioSource != null && m_CardsMatchClip != null)
+            m_AudioSource.PlayOneShot(m_CardsMatchClip);
     }
 
     /// <summary>
@@ -82,8 +85,8 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     private void PlayMismatchSound()
     {
-        if (m_AudioSource != null && CardsMismatchClip != null)
-            m_AudioSource.PlayOneShot(CardsMismatchClip);
+        if (m_AudioSource != null && m_CardsMismatchClip != null)
+            m_AudioSource.PlayOneShot(m_CardsMismatchClip);
     }
 
     /// <summary>
@@ -91,7 +94,7 @@ public class AudioManager : MonoBehaviour
     /// </summary>
     private void PlayGameOverSound()
     {
-        if (m_AudioSource != null && GameOverClip != null)
-            m_AudioSource.PlayOneShot(GameOverClip);
+        if (m_AudioSource != null && m_GameOverClip != null)
+            m_AudioSource.PlayOneShot(m_GameOverClip);
     }
 }

@@ -13,6 +13,12 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private GameManager m_GameManager;
 
+    [SerializeField]
+    private Timer m_Timer;
+
+    [SerializeField]
+    private PopupHandler m_PopupHandler;
+
     //SCREENS
     [Header("Screens")]
     [SerializeField]
@@ -37,17 +43,32 @@ public class UIManager : MonoBehaviour
 
     //GAMEPLAY SCREEN UI
     [Header("Gameplay Screen UI")]
+    /// <summary>
+    /// Pause Button
+    /// </summary>
     [SerializeField]
     private Button m_PauseButton;
+
+    /// <summary>
+    /// Time Text
+    /// </summary>
+    [SerializeField]
+    private TextMeshProUGUI m_TimerText;
 
     //PAUSE SCREEN UI
     [Header("Pause Screen UI")]
     [SerializeField]
     private Button m_PauseHomeButton;
 
+    /// <summary>
+    /// Resume Button from Pause Screen
+    /// </summary>
     [SerializeField]
     private Button m_PauseResumeButton;
 
+    /// <summary>
+    /// Restart Button from Pause Screen
+    /// </summary>
     [SerializeField]
     private Button m_PauseRestartButton;
 
@@ -63,6 +84,9 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI m_LevelText;
 
     [SerializeField]
+    private TextMeshProUGUI m_TimeText;
+
+    [SerializeField]
     private TextMeshProUGUI m_ScoreText;
 
     //GAME DATA MANAGEMENT
@@ -76,13 +100,19 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI m_GameDataText;
 
+    [SerializeField]
+    private Button m_ClearGameProgressDataButton;
+
     /// <summary>
     /// 
     /// </summary>
     private void OnEnable()
     {
-        //Subscribe for Events
+        //Subscribe for Game Events
         EventManager.OnUpdateGameData += UpdateScoreboard;
+
+        //Subscribe for Timer Tick
+        m_Timer.OnSecondTick += UpdateTimer;
     }
 
     /// <summary>
@@ -90,8 +120,11 @@ public class UIManager : MonoBehaviour
     /// </summary>
     private void OnDisable()
     {
-        //Unsibscribe for Evenets
+        //Unsibscribe for Game Evenets
         EventManager.OnUpdateGameData -= UpdateScoreboard;
+
+        //UnSubscribe for Timer Tick
+        m_Timer.OnSecondTick -= UpdateTimer;
     }
 
     /// <summary>
@@ -116,6 +149,7 @@ public class UIManager : MonoBehaviour
 
         //Game Data
         m_DisplayGameDataButton.onClick.AddListener(OnLoadGameData);
+        m_ClearGameProgressDataButton.onClick.AddListener(ClearGameProgressData);
     }
 
     /// <summary>
@@ -125,9 +159,15 @@ public class UIManager : MonoBehaviour
     private void UpdateScoreboard(GameData CurrentSessionData)
     {
         m_LevelText.text = "Level : " + ((DifficultyLevel)CurrentSessionData.DifficultyLevelIndex);
+        m_TimeText.text = "Time : " + CurrentSessionData.Time;
         m_ScoreText.text = "Score : " + CurrentSessionData.Score;
 
         ShowResultScreen();
+    }
+
+    private void UpdateTimer(int Time)
+    {
+        m_TimerText.text = m_Timer.ElapsedTimeFormatted;
     }
 
     /// <summary>
@@ -171,11 +211,37 @@ public class UIManager : MonoBehaviour
         m_GameManager.ResumeGame();
     }
 
+    /// <summary>
+    /// Display the Progress Data
+    /// </summary>
     private void OnLoadGameData()
     {
-        string GameDataLog = m_GameManager.LogProgressData();
-        m_GameDataText.text = GameDataLog;
+        ////Display Entire Game Data List as a Single Text
+        //string GameDataLog = m_GameManager.LogProgressData();
+        //m_GameDataText.text = GameDataLog;
+
+        //Load Game Data and Display it as List in UI
+        m_GameManager.LoadProgressData();
+
         m_GameDataScreen.SetActive(true);
+    }
+
+    /// <summary>
+    /// Clear the Game ProgressData
+    /// </summary>
+    private void ClearGameProgressData()
+    {
+        m_PopupHandler.gameObject.SetActive(true);
+        m_PopupHandler.SetPopUp("Warning", "Clear All progress Data?",
+            "NO", () =>
+            {
+                m_PopupHandler.gameObject.SetActive(false);
+            },
+            "YES", () =>
+             {
+                 m_GameManager.ClearGameProgressData();
+                 m_PopupHandler.gameObject.SetActive(false);
+             });
     }
 
     /// <summary>

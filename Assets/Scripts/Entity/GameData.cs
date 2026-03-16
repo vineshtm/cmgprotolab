@@ -22,4 +22,9 @@ public class GameData
     /// Match Check (2 card Selection) = one attempt
     /// </summary>
     public int Attempts;
+
+    /// <summary>
+    /// Time taken to complete
+    /// </summary>
+    public string Time;
 }

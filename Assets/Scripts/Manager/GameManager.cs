@@ -19,7 +19,13 @@ public class GameManager : MonoBehaviour
     private ProgressManager m_ProgressManager;
 
     [SerializeField]
+    private Timer m_Timer;
+
+    [SerializeField]
     private GridLayoutSpawnerUtil m_GridSpawner;
+
+    [SerializeField]
+    private ProgressDataDisplayUtil m_DisplayGameDataUtil;
 
     //PRIVATE VARIABLES
     private int Rows = 2;
@@ -53,6 +59,8 @@ public class GameManager : MonoBehaviour
 
         SetupGrid(Rows, Columns);//Grid Layout Setup
 
+        m_Timer.StartTimer(); //Start Timer
+
         EventManager.StartGame(); //trigger Game Session Ready
     }
 
@@ -61,7 +69,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void PauseGame()
     {
-
+        m_Timer.PauseTimer(); //Pause Timer
     }
 
     /// <summary>
@@ -79,7 +87,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void ResumeGame()
     {
-
+        m_Timer.ResumeTimer(); //Resume Timer
     }
 
     /// <summary>
@@ -105,7 +113,7 @@ public class GameManager : MonoBehaviour
         m_CurrentGameDetails.Attempts = 0;
 
         //Reset Score
-        m_ScoringMechanism.ResetScore();
+        m_ScoringMechanism.ResetScoring();
     }
 
     /// <summary>
@@ -178,7 +186,7 @@ public class GameManager : MonoBehaviour
             SelectedCardOne.Match(); //Update Card State
             SelectedCardTwo.Match();  //Update Card State
 
-            m_ScoringMechanism.AddScore(10); //+10 Points if Cards Match
+            m_ScoringMechanism.ReportMatchResult(true); // Report Match to Scoring Manager
 
             OnPairMatched();
 
@@ -189,7 +197,7 @@ public class GameManager : MonoBehaviour
             SelectedCardOne.FlipBack(); //Update Card State
             SelectedCardTwo.FlipBack(); //Update Card State
 
-            m_ScoringMechanism.AddScore(-5); // -5 points if cards does not match. Negative marking for mismatch applied
+            m_ScoringMechanism.ReportMatchResult(false); // Report Match to Scoring Manager
 
             EventManager.CardMatchResult(false);
         }
@@ -218,7 +226,10 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void GameOver()
     {
+        m_Timer.StopTimer();
+
         m_CurrentGameDetails.Score = m_ScoringMechanism.Score; //Update Game Score
+        m_CurrentGameDetails.Time = m_Timer.ElapsedTimeFormatted; //Update the Game Time
 
         EventManager.EndGame();
         EventManager.DeclareGameData(m_CurrentGameDetails); //Trigger Game Over/Result Declare
@@ -231,7 +242,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("========GAME OVER=========="
             + "====" + m_CurrentGameDetails.DifficultyLevelIndex
             + "====" + m_CurrentGameDetails.Score
-            + "====" + m_CurrentGameDetails.Attempts);
+            + "====" + m_CurrentGameDetails.Attempts
+            + "====" + m_CurrentGameDetails.Time);
 #endif
     }
 
@@ -278,6 +290,48 @@ public class GameManager : MonoBehaviour
 
     //PUBLIC UTIL
 
+    /// <summary>
+    /// Get the Game Progress data and Display in UI as Table with Display Util
+    /// Get the Progress Data and Display in UI
+    /// </summary>
+    public void LoadProgressData()
+    {
+        ProgressData CurrentProgressData = m_ProgressManager.LoadProgress();
+
+        if (CurrentProgressData != null)
+        {
+            m_DisplayGameDataUtil.SetTotalGameSessionText(CurrentProgressData.TotalGameSessions);
+            m_DisplayGameDataUtil.SetHighscoreText(CurrentProgressData.HighestScore);
+
+            List<GameData> GameDataList = CurrentProgressData.GameDetailList;
+
+            //Instantiate Game Data Item Prefabs in Grid
+            List<GameObject> CurrentSessionCardList = m_DisplayGameDataUtil.GenerateListView(GameDataList.Count);
+
+            for (int i = 0; i < GameDataList.Count; i++)
+            {
+                GameDataItemUI cardview = CurrentSessionCardList[i].GetComponent<GameDataItemUI>();
+                cardview.SetGameData((i + 1), GameDataList[i]);
+            }
+        }
+        else
+        {
+            m_DisplayGameDataUtil.SetNoData();
+        }
+    }
+
+    /// <summary>
+    /// Clear the Game Progress data
+    /// </summary>
+    public void ClearGameProgressData()
+    {
+        m_ProgressManager.ClearAllProgressData();
+    }
+
+    /// <summary>
+    /// Util to Create a String of Complete Progress Data
+    /// </summary>
+    /// <returns></returns>
     public string LogProgressData()
     {
         string ProgressDataString = "";
@@ -288,7 +342,7 @@ public class GameManager : MonoBehaviour
         {
             List<GameData> GameDataList = CurrentProgressData.GameDetailList;
 
-            string GameDataUnitystring = "";
+            string GameDataUnitString = "";
 
 #if UNITY_EDITOR
             string EditorLogDataString = "";
@@ -296,14 +350,16 @@ public class GameManager : MonoBehaviour
 
             for (int i = 0; i < GameDataList.Count; i++)
             {
-                GameDataUnitystring += (i+1) + "."+
+                GameDataUnitString += (i+1) + "."+
                     " Level:" + ((DifficultyLevel)GameDataList[i]?.DifficultyLevelIndex) +
+                    ", Time:" + GameDataList[i]?.Time +
                     ", Score:" + GameDataList[i]?.Score +
                     " \n";
 
 #if UNITY_EDITOR
                 EditorLogDataString += (i + 1) + "." +
                     " Level:" + ((DifficultyLevel)GameDataList[i]?.DifficultyLevelIndex) +
+                    " Time:" + GameDataList[i]?.Time +
                     " Score:" + GameDataList[i]?.Score +
                     " Attempts:" + GameDataList[i]?.Attempts +
                     " \n";
@@ -313,7 +369,7 @@ public class GameManager : MonoBehaviour
             ProgressDataString = ("\n"
                 + "Total Game Sessions : " + CurrentProgressData.TotalGameSessions + "\n"
                 + "Highest Score : " + CurrentProgressData.HighestScore + "\n\n"
-                + GameDataUnitystring + "\n");
+                + GameDataUnitString + "\n");
 
 #if UNITY_EDITOR
             Debug.Log("==========PROGRESS DATA==============" + "\n"
@@ -325,7 +381,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            ProgressDataString = "======NO PROGRESSDATA===========";
+            ProgressDataString = "         NO PROGRESSDATA         ";
             Debug.Log("======NO PROGRESSDATA===========");
         }
 
